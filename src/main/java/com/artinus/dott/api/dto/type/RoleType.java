@@ -1,4 +1,4 @@
-package com.artinus.dott.dto.type;
+package com.artinus.dott.api.dto.type;
 
 public enum RoleType {
 

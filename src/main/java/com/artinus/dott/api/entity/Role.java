@@ -1,6 +1,6 @@
-package com.artinus.dott.entity;
+package com.artinus.dott.api.entity;
 
-import com.artinus.dott.dto.type.RoleType;
+import com.artinus.dott.api.dto.type.RoleType;
 import lombok.*;
 
 import javax.persistence.*;

@@ -1,32 +1,41 @@
 package com.artinus.dott.security;
 
+import com.artinus.dott.api.dto.type.RoleType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import javax.sql.DataSource;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    @Bean
-    public DataSource dataSource(){
-        return new EmbeddedDatabaseBuilder()
-                .setType(EmbeddedDatabaseType.H2)
-                .build();
+    private final String baseUrl = "/artinus-dott/api/v1";
+
+    public HttpSecurity commonConfigure(HttpSecurity httpSecurity) throws Exception{
+        return httpSecurity
+                .httpBasic().disable()
+                .cors().configurationSource(corsConfigurationSource())
+                .and()
+                .csrf().disable();
+    }
+
+    private CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOriginPattern("*");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean
@@ -35,15 +44,19 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public UserDetailsService jdbcUserDetailsService(DataSource dataSource){
-        String usersByUsernameQuery = "SELECT username, password, enabled from tbl_users where username = ?";
-        String authsByUserQuery = "select use";
-        JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(dataSource);
-        userDetailsManager.setUsersByUsernameQuery("SELECT");
-        return new JdbcUserDetailsManager();
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        return commonConfigure(httpSecurity)
+                .authorizeRequests()
+                .antMatchers(baseUrl + "/login", baseUrl + "/user/**").permitAll()
+                .antMatchers(baseUrl + "/admin/**").hasRole(RoleType.ADMIN_ROLE.name())
+                .anyRequest().hasRole(RoleType.USER_ROLE.name())
+                .and().build();
     }
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//
-//    }
+
+
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
 }

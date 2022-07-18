@@ -1,8 +1,7 @@
-package com.artinus.dott.repository;
+package com.artinus.dott.api.repository;
 
-import com.artinus.dott.dto.type.RoleType;
-import com.artinus.dott.entity.Role;
-import com.artinus.dott.entity.Users;
+import com.artinus.dott.api.dto.type.RoleType;
+import com.artinus.dott.api.entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

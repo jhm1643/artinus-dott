@@ -1,11 +1,10 @@
-package com.artinus.dott.entity;
+package com.artinus.dott.api.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -19,9 +18,13 @@ public class Users {
     @Id
     private String email;
 
-    @Column(name = "password")
+    @Column(nullable = false)
     private String password;
 
+    @Column
+    private LocalDateTime updateDt;
+
+    @Setter
     @ManyToMany(cascade = CascadeType.MERGE)
     @JoinTable(
             name="user_role",

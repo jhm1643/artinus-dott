@@ -1,14 +1,12 @@
 package com.artinus.dott.config;
 
-import com.artinus.dott.dto.type.RoleType;
-import com.artinus.dott.entity.Role;
-import com.artinus.dott.repository.RoleRepository;
-import com.artinus.dott.repository.UsersRepository;
+import com.artinus.dott.api.dto.type.RoleType;
+import com.artinus.dott.api.entity.Role;
+import com.artinus.dott.api.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 

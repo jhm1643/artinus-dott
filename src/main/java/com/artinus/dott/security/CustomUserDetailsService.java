@@ -1,8 +1,8 @@
 package com.artinus.dott.security;
 
-import com.artinus.dott.repository.UsersRepository;
+import com.artinus.dott.exception.ApiExceptionCode;
+import com.artinus.dott.api.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,9 +15,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UsersRepository usersRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//        User user = usersRepository.find
-
-        return null;
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return new CustomUserDetails(usersRepository.findByEmail(email).orElseThrow(()->new UsernameNotFoundException(ApiExceptionCode.NOT_FOUND_USER.getMessage())));
     }
 }

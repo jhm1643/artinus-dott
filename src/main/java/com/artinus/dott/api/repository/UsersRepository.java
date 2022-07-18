@@ -1,6 +1,6 @@
-package com.artinus.dott.repository;
+package com.artinus.dott.api.repository;
 
-import com.artinus.dott.entity.Users;
+import com.artinus.dott.api.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
