@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -24,7 +25,9 @@ public class SecurityConfiguration {
                 .httpBasic().disable()
                 .cors().configurationSource(corsConfigurationSource())
                 .and()
-                .csrf().disable();
+                .csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and();
     }
 
     private CorsConfigurationSource corsConfigurationSource() {
@@ -50,6 +53,8 @@ public class SecurityConfiguration {
                 .antMatchers(baseUrl + "/login", baseUrl + "/user/**").permitAll()
                 .antMatchers(baseUrl + "/admin/**").hasRole(RoleType.ADMIN_ROLE.name())
                 .anyRequest().hasRole(RoleType.USER_ROLE.name())
+                .and()
+                .addFilter()
                 .and().build();
     }
 
