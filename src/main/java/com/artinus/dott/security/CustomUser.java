@@ -4,11 +4,11 @@ import com.artinus.dott.api.entity.Users;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 
-public class CustomUserDetails extends User {
+public class CustomUser extends User {
 
     private Users users;
 
-    public CustomUserDetails(Users users){
+    public CustomUser(Users users){
         super(
                 users.getEmail(),
                 users.getPassword(),

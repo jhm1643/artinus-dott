@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class JwtTokenResponse {
+public class AuthTokenDto {
 
     @ApiModelProperty("jwt access token")
     private String accessToken;
