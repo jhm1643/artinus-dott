@@ -2,7 +2,6 @@ package com.artinus.dott.api.service;
 
 import com.artinus.dott.api.dto.request.SignInRequest;
 import com.artinus.dott.api.dto.request.UserRegistRequest;
-import com.artinus.dott.api.dto.response.AuthTokenDto;
 import com.artinus.dott.api.dto.type.RoleType;
 import com.artinus.dott.api.entity.Role;
 import com.artinus.dott.api.entity.Users;
@@ -10,15 +9,12 @@ import com.artinus.dott.api.repository.RoleRepository;
 import com.artinus.dott.api.repository.UsersRepository;
 import com.artinus.dott.api.util.AES256Util;
 import com.artinus.dott.security.CustomUser;
-import com.artinus.dott.security.CustomUserDetails;
 import com.artinus.dott.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,11 +48,21 @@ public class AuthService {
                 .build());
     }
 
+//    public void signIn(SignInRequest request){
+//        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+//        SecurityContextHolder.getContext().setAuthentication(authentication);
+//        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+//    }
+
     public void signIn(SignInRequest request){
         String email = request.getEmail();
         String password = request.getPassword();
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(new UsernamePasswordAuthenticationToken(email, password));
         CustomUser customUser = ((CustomUser) authentication.getPrincipal());
         String token = jwtProvider.generateToken(authentication);
+    }
+
+    public void validationAccessToken(String accessToken){
+        jwtProvider.parseClaims(accessToken, false);
     }
 }
