@@ -3,7 +3,9 @@ package com.artinus.dott.security;
 import com.artinus.dott.api.dto.type.RoleType;
 import com.artinus.dott.api.service.AuthService;
 import com.artinus.dott.security.filter.JwtAuthFilter;
+import com.artinus.dott.security.filter.exception.AccessDeniedHandlerImpl;
 import com.artinus.dott.security.filter.exception.AuthExceptionHandler;
+import com.artinus.dott.security.filter.exception.AuthenticationEntryPointImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,10 +14,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -29,13 +29,23 @@ public class SecurityConfiguration {
 
     private final AuthService authService;
     private final AuthExceptionHandler authExceptionHandler;
+    private final AccessDeniedHandlerImpl accessDeniedHandlerImpl;
+    private final AuthenticationEntryPointImpl authenticationEntryPoint;
 
     public HttpSecurity commonConfigure(HttpSecurity httpSecurity) throws Exception{
         return httpSecurity
                 .httpBasic().disable()
-                .cors().configurationSource(corsConfigurationSource())
+                    .cors().configurationSource(corsConfigurationSource())
                 .and()
-                .csrf().disable();
+                    .csrf().disable()
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                    .headers().frameOptions().sameOrigin()
+                .and()
+                    .exceptionHandling()
+                    .authenticationEntryPoint(authenticationEntryPoint)
+                    .accessDeniedHandler(accessDeniedHandlerImpl)
+                .and();
     }
 
     private CorsConfigurationSource corsConfigurationSource() {
@@ -50,18 +60,20 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer(){
-        return (web) -> web.ignoring().antMatchers("/h2-console/**");
+    public WebSecurityCustomizer ignoringCustomizer() {
+        return (web) -> web.ignoring().antMatchers(
+                "/h2-console/**",
+                baseUrl + "/auth/signUp",
+                baseUrl + "/auth/signIn");
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         return commonConfigure(httpSecurity)
-                .authorizeRequests()
-                .antMatchers(baseUrl + "/auth/signUp", baseUrl + "/auth/signIn").permitAll()
-                .anyRequest().hasAuthority(RoleType.USER_ROLE.name())
+                    .authorizeRequests()
+                    .anyRequest().hasAuthority(RoleType.USER_ROLE.name())
                 .and()
-                .addFilterBefore(new JwtAuthFilter(authService, authExceptionHandler), UsernamePasswordAuthenticationFilter.class)
+                    .addFilterBefore(new JwtAuthFilter(authService, authExceptionHandler), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

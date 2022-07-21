@@ -15,7 +15,8 @@ public enum ApiExceptionCode {
 
     //HTTP STATUS CODE 401
     NOT_FOUND_USER(HttpStatus.UNAUTHORIZED,4011, "아이디/비밀번호를 다시 확인해주세요."),
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 4012, "인가되지 않은 사용자 입니다."),
+    NOT_AUTHENTICATION(HttpStatus.UNAUTHORIZED, 4012, "인증되지 않은 사용자 입니다."),
+    ACCESS_DENIED(HttpStatus.UNAUTHORIZED, 4012, "인가되지 않은 사용자 입니다."),
     AUTH_TOKEN_EXPIRE(HttpStatus.UNAUTHORIZED, 4011, "토큰 유효기간이 만료되었습니다."),
     NOT_AUTH_TOKEN_EXPIRE(HttpStatus.UNAUTHORIZED, 4012, "토큰 유효기간이 아직 만료되지 않았습니다."),
     LOGOUT_USER(HttpStatus.UNAUTHORIZED, 4013, "로그아웃된 사용자입니다."),

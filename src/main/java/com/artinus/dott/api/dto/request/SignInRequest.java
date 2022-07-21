@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 @ApiModel(value = "로그인 요청")
@@ -19,7 +18,6 @@ public class SignInRequest {
 
     @ApiModelProperty(name = "이메일", required = true)
     @NotBlank(message = "이메일은 필수 값입니다.")
-    @Email(message = "이메일 형식이어야 합니다.")
     private String email;
 
     @ApiModelProperty(name = "패스워드", required = true)

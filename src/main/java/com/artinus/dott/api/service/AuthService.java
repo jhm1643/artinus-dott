@@ -10,6 +10,7 @@ import com.artinus.dott.api.repository.MemberRepository;
 import com.artinus.dott.api.util.AES256Util;
 import com.artinus.dott.exception.ApiException;
 import com.artinus.dott.exception.ApiExceptionCode;
+import com.artinus.dott.security.CustomUser;
 import com.artinus.dott.security.jwt.JwtProvider;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -54,17 +55,21 @@ public class AuthService {
         String email = request.getEmail();
         String password = request.getPassword();
 
-        Long memberId = findMemberIdByEmail(email);
+        Authentication authentication = authenticationManagerBuilder
+                .getObject()
+                .authenticate(new UsernamePasswordAuthenticationToken(aes256Util.encrypt(email), password));
 
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(new UsernamePasswordAuthenticationToken(memberId, password));
-        String jwtToken = jwtProvider.generateToken(authentication);
-        blackListRepository.findById(memberId)
-                        .ifPresent(blackList -> blackListRepository.delete(blackList));
+        Member member = ((CustomUser) authentication.getPrincipal()).getMember();
+        String jwtToken = jwtProvider.generateToken(member);
+
+        deleteDlackList(member.getId());
         return jwtToken;
     }
 
-    public void singOut(Long id) {
-        blackListRepository.save(BlackList.builder().memberId(id).build());
+    public void singOut(Long memberId) {
+        blackListRepository.save(BlackList.builder()
+                .memberId(memberId)
+                .build());
     }
 
     public void validateAccessToken(String accessToken) {
@@ -73,14 +78,13 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(jwtProvider.getAuthentication(claims));
     }
 
+    private void deleteDlackList(Long memberId){
+        blackListRepository.findById(memberId)
+                .ifPresent(blackList -> blackListRepository.delete(blackList));
+    }
+
     private void checkBlackList(Long memberId){
         if(blackListRepository.findById(memberId).isPresent())
             throw new ApiException(ApiExceptionCode.LOGOUT_USER);
-    }
-
-    private Long findMemberIdByEmail(String email){
-        return memberRepository.findByEmail(aes256Util.encrypt(email))
-                .orElseThrow(()->new ApiException(ApiExceptionCode.NOT_FOUND_USER))
-                .getId();
     }
 }

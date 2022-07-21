@@ -26,8 +26,7 @@ public class JwtProvider {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String generateToken(Authentication authentication){
-        Member member = ((CustomUser) authentication.getPrincipal()).getMember();
+    public String generateToken(Member member){
         final long now = new Date().getTime();
         return Jwts.builder()
             .claim("role", member.getRole().name())

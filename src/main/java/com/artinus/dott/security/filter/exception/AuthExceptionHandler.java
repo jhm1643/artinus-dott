@@ -26,10 +26,10 @@ public class AuthExceptionHandler {
 
         if (e.getClass().equals(ExpiredJwtException.class))
             apiExceptionCode = ApiExceptionCode.AUTH_TOKEN_EXPIRE;
-        else if(e.getClass().isAssignableFrom(AuthenticationException.class))
-            apiExceptionCode = ApiExceptionCode.INVALID_USER_ACCOUNT;
-        else if(e.getClass().equals(AccessDeniedException.class))
-            apiExceptionCode = ApiExceptionCode.NOT_APPROVED_USER_ACCOUNT;
+        else if(AuthenticationException.class.isAssignableFrom(e.getClass()))
+            apiExceptionCode = ApiExceptionCode.NOT_AUTHENTICATION;
+        else if(AccessDeniedException.class.isAssignableFrom(e.getClass()))
+            apiExceptionCode = ApiExceptionCode.ACCESS_DENIED;
         else if(e.getClass().equals(ApiException.class))
             apiExceptionCode = ((ApiException) e).getApiExceptionCode();
         else
