@@ -1,40 +1,93 @@
 package com.artinus.dott.exception;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.ExpiredJwtException;
-import lombok.SneakyThrows;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.AuthenticationException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestValueException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
-import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
-    private static final String CONTENT_TYPE_APPLICATION_JSON = "application/json;charset=UTF-8";
-    private final ObjectMapper objectMapper;
+    @Getter
+    @Builder
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ErrorResponse {
+        private Long code;
+        private String message;
+        private List<BindingResultError> bindingErrorMessage;
+        private String path;
+        private String stackTrace;
 
-    @SneakyThrows
-    public void exceptionHandler(HttpServletResponse response, Exception e){
-        ApiExceptionCode apiExceptionCode;
+        @JsonIgnore
+        private HttpStatus httpStatus;
+    }
 
-        if (e.getClass().equals(ExpiredJwtException.class))
-            apiExceptionCode = ApiExceptionCode.AUTH_TOKEN_EXPIRE;
-        else if(e.getClass().isAssignableFrom(AuthenticationException.class))
-            apiExceptionCode = ApiExceptionCode.INVALID_USER_ACCOUNT;
-        else if(e.getClass().equals(AccessDeniedException.class))
-            apiExceptionCode = ApiExceptionCode.NOT_APPROVED_USER_ACCOUNT;
-        else if(e.getClass().equals(ApiException.class))
-            apiExceptionCode = ((ApiException) e).getApiExceptionCode();
-        else
-            apiExceptionCode = ApiExceptionCode.BAD_AUTH_TOKEN;
+    @Builder
+    @Getter
+    public static class BindingResultError{
+        private String field;
+        private String message;
+    }
 
-        response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
-        response.getWriter().write(objectMapper.writeValueAsString(ApiExceptionHandler.ErrorResponse.builder()
-                .code(apiExceptionCode.getCode())
-                .message(apiExceptionCode.getMessage())
-                .build()));
-        response.setStatus(apiExceptionCode.getHttpStatus().value());
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> methodValidException(MethodArgumentNotValidException exception){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.builder()
+                        .bindingErrorMessage(getBindingResultErrors(exception.getBindingResult()))
+                        .build());
+    }
+
+    private List<BindingResultError> getBindingResultErrors(BindingResult bindingResult){
+        return bindingResult.getFieldErrors().stream()
+                .map(fieldError -> BindingResultError.builder()
+                        .field(fieldError.getField())
+                        .message(fieldError.getDefaultMessage())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ErrorResponse> handleApiException(ApiException exception) {
+        return ResponseEntity
+                .status(exception.getApiExceptionCode().getHttpStatus())
+                .body(ErrorResponse.builder()
+                        .code(exception.getApiExceptionCode().getCode())
+                        .message(exception.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleException() {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.builder()
+                        .code(ApiExceptionCode.INVALID_USER_ACCOUNT.getCode())
+                        .message(ApiExceptionCode.INVALID_USER_ACCOUNT.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception exception, WebRequest request) {
+        return ResponseEntity
+                .status(MissingRequestValueException.class.isAssignableFrom(exception.getClass()) ? HttpStatus.BAD_REQUEST : HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorResponse.builder()
+                        .path(request.getDescription(false))
+                        .message(exception.getMessage())
+                        .stackTrace(ExceptionUtils.getStackTrace(exception))
+                        .build());
     }
 }

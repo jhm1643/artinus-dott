@@ -15,7 +15,7 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @Builder
 @Getter
-public class UserRegistRequest {
+public class SignUpRequest {
 
     @ApiModelProperty(name = "이메일", required = true)
     @NotBlank(message = "이메일은 필수 값입니다.")

@@ -1,22 +1,24 @@
 package com.artinus.dott.security;
 
-import com.artinus.dott.api.entity.Users;
+import com.artinus.dott.api.entity.Member;
+import lombok.Getter;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
+import java.util.Collections;
+
+@Getter
 public class CustomUser extends User {
 
-    private Users users;
+    private Member member;
 
-    public CustomUser(Users users){
+    public CustomUser(Member member){
         super(
-                users.getEmail(),
-                users.getPassword(),
-                AuthorityUtils.createAuthorityList(users.getRoles().stream()
-                        .map(role -> role.getRoleName())
-                        .toArray(String[]::new))
+                String.valueOf(member.getId()),
+                member.getPassword(),
+                Collections.singletonList(new SimpleGrantedAuthority(member.getRole().name()))
         );
-
-        this.users = users;
+        this.member = member;
     }
 }

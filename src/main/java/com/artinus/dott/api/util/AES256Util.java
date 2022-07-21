@@ -12,7 +12,7 @@ import java.util.Base64;
 @Component
 public class AES256Util {
 
-    @Value("${key}")
+    @Value("${aes256.key}")
     private String key;
 
     public static String alg = "AES/CBC/PKCS5Padding";

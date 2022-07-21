@@ -1,5 +1,8 @@
 package com.artinus.dott.exception;
 
+import lombok.Getter;
+
+@Getter
 public class ApiException extends RuntimeException{
 
     private ApiExceptionCode apiExceptionCode;
