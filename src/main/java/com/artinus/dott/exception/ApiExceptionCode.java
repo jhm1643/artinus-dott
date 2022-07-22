@@ -31,6 +31,6 @@ public enum ApiExceptionCode {
 
 
     private HttpStatus httpStatus;
-    private long code;
+    private int code;
     private String message;
 }

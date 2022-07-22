@@ -46,6 +46,6 @@ public class AuthController {
     public void signOut(
             @AuthMember Member member
     ){
-        authService.singOut(member.getId());
+        authService.signOut(member.getId());
     }
 }

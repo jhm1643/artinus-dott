@@ -64,7 +64,8 @@ public class SecurityConfiguration {
         return (web) -> web.ignoring().antMatchers(
                 "/h2-console/**",
                 baseUrl + "/auth/signUp",
-                baseUrl + "/auth/signIn");
+                baseUrl + "/auth/signIn",
+                baseUrl + "/member/**");
     }
 
     @Bean

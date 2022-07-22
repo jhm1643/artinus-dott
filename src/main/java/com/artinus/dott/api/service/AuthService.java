@@ -66,7 +66,7 @@ public class AuthService {
         return jwtToken;
     }
 
-    public void singOut(Long memberId) {
+    public void signOut(Long memberId) {
         blackListRepository.save(BlackList.builder()
                 .memberId(memberId)
                 .build());

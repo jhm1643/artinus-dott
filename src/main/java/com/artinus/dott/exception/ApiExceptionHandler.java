@@ -26,7 +26,7 @@ public class ApiExceptionHandler {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ErrorResponse {
-        private Long code;
+        private int code;
         private String message;
         private List<BindingResultError> bindingErrorMessage;
         private String path;
