@@ -63,6 +63,14 @@ public class SecurityConfiguration {
     public WebSecurityCustomizer ignoringCustomizer() {
         return (web) -> web.ignoring().antMatchers(
                 "/h2-console/**",
+                "/swagger-resources",
+                "/swagger-resources/**",
+                "/configuration/ui",
+                "/configuration/security",
+                "/swagger-ui.html",
+                "/webjars/**",
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
                 baseUrl + "/auth/signUp",
                 baseUrl + "/auth/signIn",
                 baseUrl + "/member/**");
